@@ -1,0 +1,24 @@
+{
+  "title": "다같이 화하학",
+  "courses": [
+    {
+      "id": "tonghap", "name": "통합과학", "color": "yellow", "group": "main", "numbered": false,
+      "units": [
+        { "id": "1", "name": "물질과 규칙성", "sims": [] },
+        { "id": "2", "name": "변화와 다양성", "sims": [] }
+      ]
+    },
+    {
+      "id": "chem", "name": "화학", "color": "sky", "group": "main",
+      "units": [
+        { "id": "1", "name": "화학의 언어", "sims": [] },
+        { "id": "2", "name": "물질의 구조와 성질", "sims": [] },
+        { "id": "3", "name": "화학 평형", "sims": [] },
+        { "id": "4", "name": "역동적인 화학 반응", "sims": [] }
+      ]
+    },
+    { "id": "history", "name": "과학의 역사와 문화", "color": "gray", "group": "sub", "sims": [] },
+    { "id": "climate", "name": "기후변화와 환경생태", "color": "gray", "group": "sub", "sims": [] },
+    { "id": "fusion", "name": "융합과학 탐구", "color": "gray", "group": "sub", "sims": [] }
+  ]
+}

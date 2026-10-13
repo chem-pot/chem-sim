@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>다같이 화하학 시뮬레이션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* 다같이 화하학 색: 노랑 #FCD973, 하늘 #8FD3F4
+   --c  : 테두리·채움 색 (로고 색 그대로)
+   --ct : 흰 바탕 위 글자 색 (같은 계열의 진한 색, 읽기 쉽게)
+   --on : 색이 채워졌을 때 그 위 글자 색 */
+:root{color-scheme:light;--bg:#fff;--card:#fff;--ink:#22303c;--sub:#66727f;--line:#e3e7ec;--soft:#f4f6f8;--danger:#c23b3b;
+  --c:#8FD3F4;--ct:#1F86C2;--on:#0c3a56}
+.yellow{--c:#FCD973;--ct:#B98A00;--on:#4a3700}
+.sky{--c:#8FD3F4;--ct:#1F86C2;--on:#0c3a56}
+.gray{--c:#BCC3CB;--ct:#5E6873;--on:#2b323a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;line-height:1.5;min-height:100vh}
+.display{font-family:'Jua','Noto Sans KR',sans-serif;font-weight:400}
+
+/* 모서리 장식 */
+.corner{position:fixed;width:clamp(140px,28vw,330px);pointer-events:none;z-index:0;user-select:none}
+.corner.tl{top:0;left:0}
+.corner.br{bottom:0;right:0}
+
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:22px clamp(28px,6vw,72px) 90px}
+header{display:flex;justify-content:center;padding:clamp(4px,1.5vw,12px) 0 0}
+header a{display:block}
+header img{display:block;width:clamp(170px,22vw,250px);height:auto}
+.crumb{font-size:.9rem;color:var(--sub);margin:6px 0 18px;min-height:1.4em;text-align:center}
+.crumb a{color:#1F86C2;font-weight:500;text-decoration:none}
+.crumb a:hover{color:#B98A00}
+
+/* ---- 첫 화면 ---- */
+.main-courses{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,6vw,96px);margin-top:clamp(6px,1.5vw,16px)}
+.sub-courses{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px);margin-top:clamp(48px,6vw,72px);padding-top:clamp(28px,4vw,44px);border-top:2px dashed var(--line)}
+@media (max-width:900px){.sub-courses{grid-template-columns:1fr;gap:40px}}
+@media (max-width:760px){.main-courses{grid-template-columns:1fr;gap:44px}}
+.course-title{margin:0 0 18px;text-align:center;font-size:clamp(2rem,3.6vw,2.9rem);color:var(--ct);line-height:1.2}
+.sub .course-title{font-size:clamp(1.45rem,2.2vw,1.8rem);margin-bottom:14px}
+.course-title a{color:inherit;text-decoration:none}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.sub .list{gap:10px}
+.pill{display:flex;align-items:center;justify-content:center;gap:8px;min-height:74px;padding:12px 26px;border:3px solid var(--c);border-radius:40px/50%;
+  color:var(--ct);text-decoration:none;font-family:'Jua','Noto Sans KR',sans-serif;font-size:clamp(1.15rem,1.7vw,1.35rem);text-align:center;background:var(--card);
+  transition:background .15s,color .15s,transform .15s}
+.sub .pill{min-height:58px;font-size:clamp(1.02rem,1.4vw,1.15rem);padding:10px 20px}
+.pill:hover,.pill:focus-visible{background:var(--c);color:var(--on);transform:translateY(-1px);outline:none}
+.pill .cnt{opacity:.8}
+.pill.ghost{border-style:dashed;opacity:.6;pointer-events:none;font-family:'Noto Sans KR',sans-serif;font-size:.92rem}
+
+/* ---- 단원 / 과목 화면 ---- */
+.page-head{text-align:center;margin:4px 0 18px}
+.page-head .course-name{font-size:1.15rem;color:var(--ct);margin:0}
+.page-head h2{margin:2px 0 0;font-size:clamp(1.8rem,3.2vw,2.4rem);color:var(--ct)}
+.page-body{max-width:900px;margin:0 auto}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.card{background:var(--card);border:3px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
+.card:hover{border-color:var(--c)}
+.card h3{margin:0;font-size:1.25rem;color:var(--ct);font-family:'Jua','Noto Sans KR',sans-serif;font-weight:400}
+.meta{color:var(--sub);font-size:.88rem}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+button,.btn{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+button:hover,.btn:hover{border-color:var(--c)}
+.primary{background:var(--c);color:var(--on);border-color:var(--c);font-weight:700}
+.primary:hover{filter:brightness(.95)}
+.danger{color:var(--danger)}
+.sharebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:18px;font-size:.88rem}
+.sharebar code{word-break:break-all;flex:1;min-width:0;font-size:.82rem}
+.empty{color:var(--sub);padding:22px 12px;text-align:center}
+
+footer{margin-top:48px;font-size:.8rem;color:var(--sub);text-align:center}
+footer a{color:var(--sub)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:20px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+#toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.on{display:flex}
+.modal .box{background:#fff;color:#111;border-radius:14px;padding:22px;text-align:center;max-width:420px;width:100%}
+.modal .box h3{margin:0 0 12px}
+#qr{display:flex;justify-content:center;margin:8px 0 12px}
+#qr img,#qr canvas{width:min(300px,70vw)!important;height:auto!important}
+.modal .url{font-size:.78rem;word-break:break-all;color:#555;margin-bottom:12px}
+
+/* ---- 관리 화면 ---- */
+.editor{max-width:900px;margin:0 auto}
+.notice{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:.88rem;margin-bottom:16px}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.ed-block{background:var(--card);border:3px solid var(--c);border-radius:14px;padding:14px;margin-bottom:16px}
+.ed-unit{border-left:3px solid var(--c);margin:12px 0 0 4px;padding:8px 0 8px 12px}
+.ed-sim{border-left:2px dashed var(--line);margin:8px 0 0 6px;padding:6px 0 6px 12px}
+.ed-line{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ed-line input,.ed-line textarea{font:inherit;font-size:.88rem;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);min-width:0}
+.ed-line .grow{flex:1 1 200px}
+.ed-line .id{width:110px}
+.ed-line textarea{flex:1 1 100%;resize:vertical;min-height:34px}
+.lbl{font-size:.75rem;color:var(--sub)}
+.small{padding:4px 8px;font-size:.8rem}
+</style>
+</head>
+<body>
+<img class="corner tl" src="assets/corner-tl.png" alt="" aria-hidden="true">
+<img class="corner br" src="assets/corner-br.png" alt="" aria-hidden="true">
+<div class="wrap">
+  <header>
+    <a href="#/" title="처음으로"><img src="assets/logo.png" alt="다같이 화하학 with 곰빵"></a>
+  </header>
+  <div class="crumb" id="crumb"></div>
+  <main id="app"></main>
+  <footer><a href="#/edit">관리</a></footer>
+</div>
+<div id="toast"></div>
+<div class="modal" id="qrModal">
+  <div class="box">
+    <h3 id="qrTitle"></h3>
+    <div id="qr"></div>
+    <div class="url" id="qrUrl"></div>
+    <button id="qrClose">닫기</button>
+  </div>
+</div>
+
+<script>
+/* 데이터 규칙 (sims.json)
+   - group: "main"(위 큰 두 칸) / "sub"(아래 회색 칸)
+   - color: "yellow" / "sky" / "gray"
+   - units 가 있으면 단원 → 시뮬레이션 2단계, units 없이 sims 만 있으면 과목 아래 바로 시뮬레이션
+   - numbered: false 이면 단원 이름 앞에 "1단원"을 붙이지 않음 */
+const FALLBACK = {"title":"다같이 화하학","courses":[]};
+const DRAFT_KEY = 'hwahahak-draft-v1';
+let pub = null, draft = null;
+
+const $ = s => document.querySelector(s);
+function el(tag, attrs, ...kids){
+  const n = document.createElement(tag);
+  if(attrs) for(const [k,v] of Object.entries(attrs)){
+    if(k==='on') for(const [ev,fn] of Object.entries(v)) n.addEventListener(ev,fn);
+    else if(k==='text') n.textContent = v;
+    else if(v!==undefined && v!==null && v!==false) n.setAttribute(k, v===true?'':v);
+  }
+  for(const k of kids.flat()){ if(k==null) continue; n.append(k.nodeType?k:document.createTextNode(k)); }
+  return n;
+}
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),1600); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function baseUrl(){ return location.href.split('#')[0].split('?')[0]; }
+function simUrl(path){ if(!path) return '#'; if(/^https?:\/\//i.test(path)) return path; return new URL(path, baseUrl()).href; }
+function pageUrl(hash){ return baseUrl() + hash; }
+function isFlat(c){ return !Array.isArray(c.units); }
+function colorOf(c){ return c.color || (c.group==='sub' ? 'gray' : 'sky'); }
+function cleanName(n){ return (n||'').replace(/^\s*([ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+|\d+)\s*[.)·]?\s*/,'').trim() || '(이름 없음)'; }
+function unitLabel(c,u,i){ return c.numbered===false ? cleanName(u.name) : `${i+1}단원 ${cleanName(u.name)}`; }
+
+async function copy(text){
+  try{ await navigator.clipboard.writeText(text); toast('링크를 복사했어요'); }
+  catch(e){ prompt('아래 링크를 복사하세요', text); }
+}
+function showQR(title, url){
+  $('#qrTitle').textContent = title; $('#qrUrl').textContent = url;
+  const box = $('#qr'); box.innerHTML='';
+  if(window.QRCode){ new QRCode(box,{text:url,width:300,height:300,correctLevel:QRCode.CorrectLevel.M}); }
+  else box.textContent = 'QR 코드를 불러오지 못했어요.';
+  $('#qrModal').classList.add('on');
+}
+$('#qrClose').onclick = ()=>$('#qrModal').classList.remove('on');
+$('#qrModal').onclick = e=>{ if(e.target.id==='qrModal') $('#qrModal').classList.remove('on'); };
+
+function loadDraft(){ try{ const s=localStorage.getItem(DRAFT_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); }catch(e){} }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+
+function crumb(parts){
+  const c = $('#crumb'); c.innerHTML='';
+  parts.forEach((p,i)=>{
+    if(i) c.append(' › ');
+    c.append(p.href ? el('a',{href:p.href,text:p.label}) : el('span',{text:p.label}));
+  });
+}
+function shareBar(label, url, title){
+  return el('div',{class:'sharebar'},
+    el('span',{text:label}), el('code',{text:url}),
+    el('button',{class:'small',on:{click:()=>copy(url)}},'링크 복사'),
+    el('button',{class:'small',on:{click:()=>showQR(title,url)}},'QR'));
+}
+
+/* ---------- 학생용 화면 ---------- */
+function courseSection(c, sub){
+  const items = isFlat(c)
+    ? c.sims.map(s=>el('li',null, el('a',{class:'pill',href:simUrl(s.path),target:'_blank',rel:'noopener',text:s.title||'(제목 없음)'})))
+    : c.units.map((u,ui)=>el('li',null, el('a',{class:'pill',href:`#/${c.id}/${u.id}`},
+        el('span',{text:unitLabel(c,u,ui)}), el('span',{class:'cnt',text:`(${u.sims.length})`}))));
+  return el('section',{class:`course ${colorOf(c)}${sub?' sub':''}`,id:`c-${c.id}`},
+    el('h2',{class:'course-title display'}, el('a',{href:`#/${c.id}`,text:`[${c.name}]`})),
+    el('ul',{class:'list'}, items.length ? items : el('li',null, el('span',{class:'pill ghost',text:'준비 중'}))));
+}
+function viewHome(d){
+  crumb([]);
+  const app=$('#app'); app.innerHTML='';
+  const main = d.courses.filter(c=>c.group!=='sub'), sub = d.courses.filter(c=>c.group==='sub');
+  if(main.length) app.append(el('div',{class:'main-courses'}, main.map(c=>courseSection(c,false))));
+  if(sub.length) app.append(el('div',{class:'sub-courses'}, sub.map(c=>courseSection(c,true))));
+}
+function simCards(sims){
+  if(!sims.length) return el('p',{class:'empty',text:'아직 등록된 시뮬레이션이 없어요.'});
+  return el('div',{class:'grid'}, sims.map(s=>{
+    const url = simUrl(s.path);
+    return el('div',{class:'card'},
+      el('h3',{text:s.title||'(제목 없음)'}),
+      s.desc ? el('div',{class:'meta',text:s.desc}) : null,
+      el('div',{class:'row'},
+        el('a',{class:'btn primary',href:url,target:'_blank',rel:'noopener'},'열기'),
+        el('button',{on:{click:()=>copy(url)}},'링크 복사'),
+        el('button',{on:{click:()=>showQR(s.title,url)}},'QR')));
+  }));
+}
+function viewFlat(c){
+  crumb([{label:'처음',href:'#/'},{label:c.name}]);
+  const app=$('#app'); app.innerHTML='';
+  app.append(el('div',{class:`page-head ${colorOf(c)}`}, el('h2',{class:'display',text:`[${c.name}]`})));
+  app.append(el('div',{class:`page-body ${colorOf(c)}`},
+    shareBar('과목 링크', pageUrl(`#/${c.id}`), c.name), simCards(c.sims)));
+}
+function viewUnit(c,u,ui){
+  const label = unitLabel(c,u,ui);
+  crumb([{label:'처음',href:'#/'},{label:c.name,href:`#/${c.id}`},{label:label}]);
+  const app=$('#app'); app.innerHTML='';
+  app.append(el('div',{class:`page-head ${colorOf(c)}`},
+    el('p',{class:'course-name display',text:`[${c.name}]`}), el('h2',{class:'display',text:label})));
+  app.append(el('div',{class:`page-body ${colorOf(c)}`},
+    shareBar('단원 링크', pageUrl(`#/${c.id}/${u.id}`), `${c.name} ${label}`), simCards(u.sims)));
+}
+
+/* ---------- 관리 화면 ---------- */
+function newId(p){ return p + Date.now().toString(36).slice(-4); }
+function move(arr,i,d){ const j=i+d; if(j<0||j>=arr.length) return; [arr[i],arr[j]]=[arr[j],arr[i]]; saveDraft(); viewEdit(); }
+function del(arr,i,what){ if(!confirm(`이 ${what}을(를) 지울까요?`)) return; arr.splice(i,1); saveDraft(); viewEdit(); }
+function inp(obj,key,ph,cls){
+  return el('input',{class:cls||'grow',placeholder:ph,value:obj[key]||'',on:{input:e=>{obj[key]=e.target.value.trim()?e.target.value:'';saveDraft();}}});
+}
+function ctrl(arr,i,what){
+  return [el('button',{class:'small',title:'위로',on:{click:()=>move(arr,i,-1)}},'▲'),
+          el('button',{class:'small',title:'아래로',on:{click:()=>move(arr,i,1)}},'▼'),
+          el('button',{class:'small danger',title:'삭제',on:{click:()=>del(arr,i,what)}},'✕')];
+}
+function download(){
+  const blob = new Blob([JSON.stringify(draft,null,2)],{type:'application/json'});
+  const a = el('a',{href:URL.createObjectURL(blob),download:'sims.json'}); document.body.append(a); a.click(); a.remove();
+  toast('sims.json을 내려받았어요');
+}
+function simEditor(list, hint){
+  const box = el('div');
+  list.forEach((s,si)=>{
+    box.append(el('div',{class:'ed-sim'},
+      el('div',{class:'ed-line'}, inp(s,'title','시뮬레이션 제목'), ...ctrl(list,si,'시뮬레이션')),
+      el('div',{class:'ed-line',style:'margin-top:4px'}, inp(s,'path',`경로 또는 주소 (예: ${hint} 또는 https://...)`),
+        el('a',{class:'btn small',href:'#',on:{click:e=>{e.preventDefault();window.open(simUrl(s.path),'_blank');}}},'열어보기')),
+      el('div',{class:'ed-line',style:'margin-top:4px'}, el('textarea',{placeholder:'한 줄 설명 (선택)',on:{input:e=>{s.desc=e.target.value;saveDraft();}}}, s.desc||''))));
+  });
+  box.append(el('button',{class:'small',style:'margin-top:8px',on:{click:()=>{list.push({id:newId('s'),title:'',desc:'',path:''});saveDraft();viewEdit();}}},'+ 시뮬레이션 추가'));
+  return box;
+}
+function viewEdit(){
+  crumb([{label:'처음',href:'#/'},{label:'관리'}]);
+  const app=$('#app'); app.innerHTML='';
+  const ed = el('div',{class:'editor sky'}); app.append(ed);
+  ed.append(el('div',{class:'notice'},
+    '여기서 고친 내용은 이 브라우저에만 임시 저장돼요. 다 고친 뒤 ',el('b',{text:'sims.json 내려받기'}),
+    ' → GitHub 저장소의 sims.json을 덮어 올리면 학생 화면에 반영됩니다.',
+    el('br'),'ID는 링크 주소에 들어가니 한 번 공유한 뒤에는 바꾸지 마세요.'));
+  ed.append(el('div',{class:'toolbar'},
+    el('button',{class:'primary',on:{click:download}},'sims.json 내려받기'),
+    el('button',{on:{click:()=>copy(JSON.stringify(draft,null,2))}},'JSON 복사'),
+    el('label',{class:'btn'},'JSON 불러오기',
+      el('input',{type:'file',accept:'.json,application/json',style:'display:none',on:{change:async e=>{
+        const f=e.target.files[0]; if(!f) return;
+        try{ const d=JSON.parse(await f.text()); if(!Array.isArray(d.courses)) throw 0; draft=normalize(d); saveDraft(); viewEdit(); toast('불러왔어요'); }
+        catch(err){ alert('올바른 sims.json 파일이 아니에요.'); }
+      }}})),
+    el('button',{class:'danger',on:{click:()=>{ if(confirm('고친 내용을 버리고 공개된 버전으로 되돌릴까요?')){ clearDraft(); draft=clone(pub); viewEdit(); } }}},'공개 버전으로 되돌리기')));
+
+  draft.courses.forEach((c,ci)=>{
+    const block = el('div',{class:`ed-block ${colorOf(c)}`},
+      el('div',{class:'ed-line'}, el('b',{text:c.group==='sub'?'과목(아래)':'과목'}), inp(c,'name','과목 이름'), inp(c,'id','ID','id'), ...ctrl(draft.courses,ci,'과목')));
+    if(isFlat(c)){
+      block.append(simEditor(c.sims, `sims/${c.id}/실험이름/`));
+    }else{
+      c.units.forEach((u,ui)=>{
+        const ub = el('div',{class:'ed-unit'},
+          el('div',{class:'ed-line'}, el('span',{class:'lbl',text:c.numbered===false?'단원':`${ui+1}단원`}), inp(u,'name','단원 이름'), inp(u,'id','ID','id'), ...ctrl(c.units,ui,'단원')),
+          simEditor(u.sims, `sims/${c.id}/u${u.id}/실험이름/`));
+        block.append(ub);
+      });
+      block.append(el('button',{class:'small',style:'margin-top:10px',on:{click:()=>{c.units.push({id:String(c.units.length+1),name:'',sims:[]});saveDraft();viewEdit();}}},'+ 단원 추가'));
+    }
+    ed.append(block);
+  });
+}
+
+/* ---------- 라우팅 ----------
+   #/              첫 화면
+   #/chem          (단원 있는 과목) 첫 화면에서 그 과목으로 / (단원 없는 과목) 과목 화면
+   #/chem/2        단원 화면 */
+function route(){
+  const h = location.hash.replace(/^#\/?/,'').split('/').filter(Boolean).map(decodeURIComponent);
+  $('#qrModal').classList.remove('on');
+  if(h[0]==='edit'){ if(!draft) draft = loadDraft() || clone(pub); viewEdit(); window.scrollTo(0,0); return; }
+  const c = pub.courses.find(x=>x.id===h[0]);
+  if(c){
+    if(isFlat(c)){ viewFlat(c); window.scrollTo(0,0); return; }
+    const ui = h[1] ? c.units.findIndex(x=>x.id===h[1]) : -1;
+    if(ui>=0){ viewUnit(c,c.units[ui],ui); window.scrollTo(0,0); return; }
+    viewHome(pub);
+    const sec = document.getElementById(`c-${c.id}`); if(sec) sec.scrollIntoView({block:'start'});
+    return;
+  }
+  viewHome(pub); window.scrollTo(0,0);
+}
+function normalize(d){
+  d.courses = d.courses || [];
+  d.courses.forEach(c=>{
+    if(Array.isArray(c.units)) c.units.forEach(u=>u.sims=u.sims||[]);
+    else c.sims = c.sims || [];
+  });
+  return d;
+}
+
+(async function init(){
+  try{
+    const r = await fetch('sims.json',{cache:'no-store'});
+    if(!r.ok) throw 0;
+    pub = await r.json();
+    if(!Array.isArray(pub.courses)) throw 0;
+  }catch(e){ pub = clone(FALLBACK); }
+  normalize(pub);
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>
