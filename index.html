@@ -51,6 +51,8 @@ header img{display:block;width:clamp(170px,22vw,250px);height:auto}
 .sub .pill{min-height:58px;font-size:clamp(1.02rem,1.4vw,1.15rem);padding:10px 20px}
 .pill:hover,.pill:focus-visible{background:var(--c);color:var(--on);transform:translateY(-1px);outline:none}
 .pill .cnt{opacity:.8}
+.pill.student{background:color-mix(in srgb,var(--c) 22%,#fff);border-style:solid;margin-top:6px}
+.pill.student .tag{font-family:'Noto Sans KR',sans-serif;font-size:.72rem;font-weight:700;background:#fff;color:var(--ct);border:1.5px solid var(--c);border-radius:20px;padding:1px 8px}
 .pill.ghost{border-style:dashed;opacity:.6;pointer-events:none;font-family:'Noto Sans KR',sans-serif;font-size:.92rem}
 
 /* ---- 단원 / 과목 화면 ---- */
@@ -71,6 +73,7 @@ button:hover,.btn:hover{border-color:var(--c)}
 .danger{color:var(--danger)}
 .sharebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:18px;font-size:.88rem}
 .sharebar code{word-break:break-all;flex:1;min-width:0;font-size:.82rem}
+@media (max-width:560px){.sharebar code{flex-basis:100%;order:3}}
 .empty{color:var(--sub);padding:22px 12px;text-align:center}
 
 footer{margin-top:48px;font-size:.8rem;color:var(--sub);text-align:center}
@@ -84,6 +87,16 @@ footer a{color:var(--sub)}
 #qr{display:flex;justify-content:center;margin:8px 0 12px}
 #qr img,#qr canvas{width:min(300px,70vw)!important;height:auto!important}
 .modal .url{font-size:.78rem;word-break:break-all;color:#555;margin-bottom:12px}
+
+/* ---- 학생 제작 화면 ---- */
+.note{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--c) 18%,#fff);border:2px solid var(--c);border-radius:16px;padding:14px 18px;margin:0 0 20px;color:var(--ink);font-size:.95rem}
+.note .ico{font-size:1.3rem;line-height:1.2}
+.group{margin:0 0 28px}
+.group h3{font-family:'Jua','Noto Sans KR',sans-serif;font-weight:400;font-size:1.35rem;color:var(--ct);margin:0 0 10px;display:flex;align-items:baseline;gap:8px}
+.group h3 small{font-family:'Noto Sans KR',sans-serif;font-size:.8rem;color:var(--sub)}
+.links{list-style:none;margin:0;padding:0;display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.links a{display:flex;align-items:center;min-height:48px;padding:10px 14px;border:2px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-size:.92rem;line-height:1.35;background:#fff;transition:border-color .15s,background .15s}
+.links a:hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff)}
 
 /* ---- 관리 화면 ---- */
 .editor{max-width:900px;margin:0 auto}
@@ -191,6 +204,11 @@ function courseSection(c, sub){
     ? c.sims.map(s=>el('li',null, el('a',{class:'pill',href:simUrl(s.path),target:'_blank',rel:'noopener',text:s.title||'(제목 없음)'})))
     : c.units.map((u,ui)=>el('li',null, el('a',{class:'pill',href:`#/${c.id}/${u.id}`},
         el('span',{text:unitLabel(c,u,ui)}), el('span',{class:'cnt',text:`(${u.sims.length})`}))));
+  if(c.students && !sub){
+    const n = c.students.groups.reduce((a,g)=>a+g.sims.length,0);
+    items.push(el('li',null, el('a',{class:'pill student',href:`#/${c.id}/students`},
+      el('span',{class:'tag',text:'학생작'}), el('span',{text:c.students.name||'학생 제작 시뮬레이션'}), el('span',{class:'cnt',text:`(${n})`}))));
+  }
   return el('section',{class:`course ${colorOf(c)}${sub?' sub':''}`,id:`c-${c.id}`},
     el('h2',{class:'course-title display'}, el('a',{href:`#/${c.id}`,text:`[${c.name}]`})),
     el('ul',{class:'list'}, items.length ? items : el('li',null, el('span',{class:'pill ghost',text:'준비 중'}))));
@@ -230,6 +248,24 @@ function viewUnit(c,u,ui){
     el('p',{class:'course-name display',text:`[${c.name}]`}), el('h2',{class:'display',text:label})));
   app.append(el('div',{class:`page-body ${colorOf(c)}`},
     shareBar('단원 링크', pageUrl(`#/${c.id}/${u.id}`), `${c.name} ${label}`), simCards(u.sims)));
+}
+
+function viewStudents(c){
+  const st = c.students, name = st.name||'학생 제작 시뮬레이션';
+  crumb([{label:'처음',href:'#/'},{label:c.name,href:`#/${c.id}`},{label:name}]);
+  const app=$('#app'); app.innerHTML='';
+  app.append(el('div',{class:`page-head ${colorOf(c)}`},
+    el('p',{class:'course-name display',text:`[${c.name}]`}), el('h2',{class:'display',text:name})));
+  const body = el('div',{class:`page-body ${colorOf(c)}`});
+  if(st.note) body.append(el('div',{class:'note'}, el('span',{class:'ico',text:'🐻'}), el('div',{text:st.note})));
+  body.append(shareBar('이 페이지 링크', pageUrl(`#/${c.id}/students`), `${c.name} ${name}`));
+  st.groups.forEach(g=>{
+    body.append(el('section',{class:'group'},
+      el('h3',null, g.name, el('small',{text:`${g.sims.length}개`})),
+      g.sims.length ? el('ul',{class:'links'}, g.sims.map(s=>el('li',null, el('a',{href:simUrl(s.path),target:'_blank',rel:'noopener',text:s.title||'(제목 미정)'}))))
+                    : el('p',{class:'empty',text:'아직 없어요.'})));
+  });
+  app.append(body);
 }
 
 /* ---------- 관리 화면 ---------- */
@@ -293,6 +329,20 @@ function viewEdit(){
         block.append(ub);
       });
       block.append(el('button',{class:'small',style:'margin-top:10px',on:{click:()=>{c.units.push({id:String(c.units.length+1),name:'',sims:[]});saveDraft();viewEdit();}}},'+ 단원 추가'));
+      if(!c.students){
+        block.append(el('button',{class:'small',style:'margin:10px 0 0 6px',on:{click:()=>{c.students={name:'학생 제작 시뮬레이션',note:'',groups:[]};saveDraft();viewEdit();}}},'+ 학생 제작 칸 만들기'));
+      }else{
+        const sb = el('div',{class:'ed-unit',style:'margin-top:18px;border-left-style:double'},
+          el('div',{class:'ed-line'}, el('b',{text:'학생 제작'}), inp(c.students,'name','칸 이름')),
+          el('div',{class:'ed-line',style:'margin-top:4px'}, el('textarea',{placeholder:'맨 위 안내 문구',on:{input:e=>{c.students.note=e.target.value;saveDraft();}}}, c.students.note||'')));
+        c.students.groups.forEach((g,gi)=>{
+          sb.append(el('div',{class:'ed-unit'},
+            el('div',{class:'ed-line'}, el('span',{class:'lbl',text:'반'}), inp(g,'name','반 이름 (예: 1-1)'), ...ctrl(c.students.groups,gi,'반')),
+            simEditor(g.sims, 'https://chem-pot.github.io/261101/')));
+        });
+        sb.append(el('button',{class:'small',style:'margin-top:8px',on:{click:()=>{c.students.groups.push({name:'',sims:[]});saveDraft();viewEdit();}}},'+ 반 추가'));
+        block.append(sb);
+      }
     }
     ed.append(block);
   });
@@ -309,6 +359,7 @@ function route(){
   const c = pub.courses.find(x=>x.id===h[0]);
   if(c){
     if(isFlat(c)){ viewFlat(c); window.scrollTo(0,0); return; }
+    if(h[1]==='students' && c.students){ viewStudents(c); window.scrollTo(0,0); return; }
     const ui = h[1] ? c.units.findIndex(x=>x.id===h[1]) : -1;
     if(ui>=0){ viewUnit(c,c.units[ui],ui); window.scrollTo(0,0); return; }
     viewHome(pub);
@@ -321,6 +372,7 @@ function normalize(d){
   d.courses = d.courses || [];
   d.courses.forEach(c=>{
     if(Array.isArray(c.units)) c.units.forEach(u=>u.sims=u.sims||[]);
+    if(c.students){ c.students.groups = c.students.groups||[]; c.students.groups.forEach(g=>g.sims=g.sims||[]); }
     else c.sims = c.sims || [];
   });
   return d;
