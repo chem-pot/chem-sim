@@ -2,23 +2,153 @@
   "title": "다같이 화하학",
   "courses": [
     {
-      "id": "tonghap", "name": "통합과학", "color": "yellow", "group": "main", "numbered": false,
+      "id": "tonghap",
+      "name": "통합과학",
+      "color": "yellow",
+      "group": "main",
+      "numbered": false,
       "units": [
-        { "id": "1", "name": "물질과 규칙성", "sims": [] },
-        { "id": "2", "name": "변화와 다양성", "sims": [] }
+        {
+          "id": "1",
+          "name": "물질과 규칙성",
+          "sims": [
+            {
+              "id": "sl08p",
+              "title": "원자 또는 이온의 전자 배치 시뮬레이터",
+              "desc": "",
+              "path": "https://chem-pot.github.io/electron-simulator/"
+            },
+            {
+              "id": "sl6fp",
+              "title": "이온결합 시뮬레이터",
+              "desc": "",
+              "path": "https://chem-pot.github.io/ionic-bonding/"
+            },
+            {
+              "id": "sle0i",
+              "title": "공유 결합 시뮬레이터",
+              "desc": "",
+              "path": "https://chem-pot.github.io/covalent-bonding/"
+            },
+            {
+              "id": "slmnz",
+              "title": "주기율표",
+              "desc": "",
+              "path": "https://chem-pot.github.io/periodic/"
+            },
+            {
+              "id": "slr3f",
+              "title": "주기율표(출제용)",
+              "desc": "",
+              "path": "https://chem-pot.github.io/periodic-table/"
+            },
+            {
+              "id": "sm1nk",
+              "title": "도체 부도체 반도체",
+              "desc": "",
+              "path": "https://chem-pot.github.io/semiconductor/"
+            }
+          ]
+        },
+        {
+          "id": "2",
+          "name": "변화와 다양성",
+          "sims": []
+        }
       ]
     },
     {
-      "id": "chem", "name": "화학", "color": "sky", "group": "main",
+      "id": "chem",
+      "name": "화학",
+      "color": "sky",
+      "group": "main",
       "units": [
-        { "id": "1", "name": "화학의 언어", "sims": [] },
-        { "id": "2", "name": "물질의 구조와 성질", "sims": [] },
-        { "id": "3", "name": "화학 평형", "sims": [] },
-        { "id": "4", "name": "역동적인 화학 반응", "sims": [] }
+        {
+          "id": "1",
+          "name": "화학의 언어",
+          "sims": []
+        },
+        {
+          "id": "2",
+          "name": "물질의 구조와 성질",
+          "sims": [
+            {
+              "id": "smfp6",
+              "title": "물의 전기분해",
+              "desc": "",
+              "path": "https://chem-pot.github.io/water-electrolysis/"
+            },
+            {
+              "id": "smllw",
+              "title": " VSEPR",
+              "desc": "",
+              "path": "https://chem-pot.github.io/vsepr/"
+            },
+            {
+              "id": "smsa9",
+              "title": "VSEPR 확장",
+              "desc": "",
+              "path": "https://chem-pot.github.io/vsepr-plus/"
+            },
+            {
+              "id": "sn2t2",
+              "title": "루이스 전자점식, 구조식",
+              "desc": "",
+              "path": "https://chem-pot.github.io/lewis-structure-simulator/"
+            },
+            {
+              "id": "sn7b6",
+              "title": "(화학) 에탄올VS다이메틸에터",
+              "desc": "",
+              "path": "https://chem-pot.github.io/isomer-polarity/"
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "name": "화학 평형",
+          "sims": [
+            {
+              "id": "sndqn",
+              "title": "물의 증발과 응축(동적 평형)",
+              "desc": "",
+              "path": "https://chem-pot.github.io/Water-equilibrium/"
+            },
+            {
+              "id": "snlwx",
+              "title": "르샤틀리에 원리",
+              "desc": "",
+              "path": "https://chem-pot.github.io/Lechatlier/"
+            }
+          ]
+        },
+        {
+          "id": "4",
+          "name": "역동적인 화학 반응",
+          "sims": []
+        }
       ]
     },
-    { "id": "history", "name": "과학의 역사와 문화", "color": "gray", "group": "sub", "sims": [] },
-    { "id": "climate", "name": "기후변화와 환경생태", "color": "gray", "group": "sub", "sims": [] },
-    { "id": "fusion", "name": "융합과학 탐구", "color": "gray", "group": "sub", "sims": [] }
+    {
+      "id": "history",
+      "name": "과학의 역사와 문화",
+      "color": "gray",
+      "group": "sub",
+      "sims": []
+    },
+    {
+      "id": "climate",
+      "name": "기후변화와 환경생태",
+      "color": "gray",
+      "group": "sub",
+      "sims": []
+    },
+    {
+      "id": "fusion",
+      "name": "융합과학 탐구",
+      "color": "gray",
+      "group": "sub",
+      "sims": []
+    }
   ]
 }
