@@ -53,7 +53,14 @@
         {
           "id": "2",
           "name": "변화와 다양성",
-          "sims": []
+          "sims": [
+            {
+              "id": "sorhb",
+              "title": "중화 반응",
+              "desc": "중화 반응 수업 중 설명 보충",
+              "path": "https://chem-pot.github.io/neutralization/"
+            }
+          ]
         }
       ]
     },
